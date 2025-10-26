@@ -5,7 +5,7 @@ async function main() {
 
     const [deployer] = await hre.ethers.getSigners();
     
-    const POOL_ADDRESS = "0x3c3a20F5c268DB6df5c01082Dc41D926e56D7E49";
+    const POOL_ADDRESS = "0xC62Af8aa9E2358884B6e522900F91d3c924e1b38";
     const STIP_ADDRESS = "0xd07Faed671decf3C5A6cc038dAD97c8EFDb507c0";
     
     console.log("Testing direct Pool.supply() call...\n");
