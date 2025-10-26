@@ -671,4 +671,5 @@ leverageController.emergencyWithdraw(user);
 ✅ **Autonomous Agent**: AI-powered backend with multi-factor risk analysis  
 ✅ **Complete Documentation**: Setup guides, API docs, and usage examples  
 ✅ **Video Demo**: https://drive.google.com/drive/u/4/folders/18YTI8SVyLuHN2aUmWr4GNGQiXaOtXaPs
+[Soz about my speech, im excrutiatingly tired while doing it]
 ✅ **GitHub Repository**: Full codebase with tests and deployment scripts
