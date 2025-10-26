@@ -49,13 +49,50 @@ class Rebalancer:
             }
         
         # Execute appropriate action
-        if action == RebalanceAction.REDUCE_LOOP:
+        if action == RebalanceAction.ADD_LOOP:
+            return self._add_loop(user_address, assessment)
+        
+        elif action == RebalanceAction.REDUCE_LOOP:
             return self._reduce_loop(user_address, assessment)
         
         elif action == RebalanceAction.EMERGENCY_UNWIND:
             return self._emergency_unwind(user_address, assessment)
         
         return {"action": "unknown", "success": False, "message": "Unknown action"}
+    
+    def _add_loop(self, user_address: str, assessment: RiskAssessment) -> Dict[str, Any]:
+        """Add leverage loop when profitable and safe"""
+        
+        logger.info(f"Adding loop for {user_address}")
+        logger.info(f"Current APY: {assessment.net_apy:.2%}")
+        logger.info(f"Next loop APY: {assessment.metrics.get('next_loop_apy', 0):.2%}")
+        
+        loops = assessment.metrics.get("loops", 0)
+        max_loops = assessment.metrics.get("max_loops", 3)
+        
+        if loops >= max_loops:
+            logger.warning("Already at max loops for strategy")
+            return {"action": "add_loop", "success": False, "message": "At max loops"}
+        
+        # NOTE: Adding loops requires additional capital or complex rebalancing
+        # For now, this is a placeholder - implementation would need to:
+        # 1. Calculate how much more to borrow
+        # 2. Execute borrow → stake → supply cycle
+        # This is complex and risky, so we'll just log the opportunity
+        
+        logger.info("⚠ Add loop opportunity detected but not implemented")
+        logger.info("Manual action recommended to increase leverage")
+        
+        return {
+            "action": "add_loop",
+            "success": False,
+            "message": "Add loop not implemented - manual action required",
+            "opportunity": {
+                "current_apy": assessment.net_apy,
+                "potential_apy": assessment.metrics.get('next_loop_apy'),
+                "health_factor": assessment.health_factor
+            }
+        }
     
     def _reduce_loop(self, user_address: str, assessment: RiskAssessment) -> Dict[str, Any]:
         """Reduce leverage by unwinding one loop"""
@@ -104,6 +141,12 @@ class Rebalancer:
         logger.critical(f"EMERGENCY UNWIND for {user_address}")
         logger.critical(f"Reasons: {', '.join(assessment.reasons)}")
         
+        # Log specific risks
+        if assessment.price_decoupling_risk > 0.05:
+            logger.critical(f"Price decoupling: {assessment.price_decoupling_risk:.2%}")
+        if assessment.correlation < 0.85:
+            logger.critical(f"Low correlation: {assessment.correlation:.3f}")
+        
         # Execute full unwind (loops=0 means unwind all)
         logger.info(f"Executing emergency unwind for {user_address}")
         
@@ -121,7 +164,8 @@ class Rebalancer:
                 "message": "Position fully unwound",
                 "tx_hash": result.get("txHash"),
                 "gas_used": result.get("gasUsed"),
-                "previous_health_factor": assessment.health_factor
+                "previous_health_factor": assessment.health_factor,
+                "decoupling_risk": assessment.price_decoupling_risk
             }
         else:
             logger.error(f"Emergency unwind failed: {result.get('error')}")

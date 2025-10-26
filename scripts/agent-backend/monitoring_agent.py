@@ -157,23 +157,36 @@ class MonitoringAgent:
         
         return correlation_data
     
-    def _log_assessment(self, user_address: str, assessment: RiskAssessment):
-        """Log risk assessment details"""
-        
-        logger.info(f"\n--- Risk Assessment for {user_address} ---")
-        logger.info(f"Risk Level: {assessment.risk_level.value.upper()}")
-        logger.info(f"Recommended Action: {assessment.recommended_action.value}")
-        logger.info(f"Health Factor: {assessment.health_factor:.3f}")
-        logger.info(f"Distance to Liquidation: {assessment.distance_to_liquidation:.2%}")
-        logger.info(f"Correlation: {assessment.correlation:.4f}")
-        logger.info(f"Gas Acceptable: {assessment.gas_acceptable}")
-        
-        if assessment.reasons:
-            logger.info("Reasons:")
-            for reason in assessment.reasons:
-                logger.info(f"  - {reason}")
-        
-        logger.info("---\n")
+def _log_assessment(self, user_address: str, assessment: RiskAssessment):
+    """Log risk assessment details"""
+    
+    logger.info(f"\n--- Risk Assessment for {user_address} ---")
+    logger.info(f"Risk Level: {assessment.risk_level.value.upper()}")
+    logger.info(f"Recommended Action: {assessment.recommended_action.value}")
+    logger.info(f"Health Factor: {assessment.health_factor:.3f}")
+    logger.info(f"Distance to Liquidation: {assessment.distance_to_liquidation:.2%}")
+    logger.info(f"Correlation: {assessment.correlation:.4f}")
+    logger.info(f"Price Decoupling Risk: {assessment.price_decoupling_risk:.2%}")
+    logger.info(f"Net APY: {assessment.net_apy:.2%}")
+    logger.info(f"Profitable: {'YES' if assessment.is_profitable else 'NO'}")
+    logger.info(f"Gas Acceptable: {assessment.gas_acceptable}")
+    
+    # Log APY breakdown
+    if "staking_apy" in assessment.metrics:
+        logger.info(f"\nAPY Breakdown:")
+        logger.info(f"  Staking APY: {assessment.metrics['staking_apy']:.2%}")
+        logger.info(f"  Supply APY: {assessment.metrics['supply_apy']:.2%}")
+        logger.info(f"  Borrow APY: {assessment.metrics['borrow_apy']:.2%}")
+        logger.info(f"  Current Net: {assessment.net_apy:.2%}")
+        if "next_loop_apy" in assessment.metrics:
+            logger.info(f"  Next Loop APY: {assessment.metrics['next_loop_apy']:.2%}")
+    
+    if assessment.reasons:
+        logger.info("\nReasons:")
+        for reason in assessment.reasons:
+            logger.info(f"  - {reason}")
+    
+    logger.info("---\n")
     
     def _log_rebalance_result(self, user_address: str, result: Dict[str, Any]):
         """Log rebalancing execution result"""
